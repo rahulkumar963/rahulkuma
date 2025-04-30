@@ -1,0 +1,53 @@
+import java.security.*;
+import javax.crypto.Cipher;
+import java.util.Base64;
+
+public class RSADemo {
+
+    // Method to create RSA key pair (public and private)
+    public static KeyPair createKeys() throws NoSuchAlgorithmException {
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("RSA");
+        keyGen.initialize(2048); // 2048-bit key for security
+        return keyGen.generateKeyPair();
+    }
+
+    // Encrypt plaintext using a public RSA key
+    public static String encryptData(String data, PublicKey pubKey) throws Exception {
+        Cipher cipher = Cipher.getInstance("RSA");
+        cipher.init(Cipher.ENCRYPT_MODE, pubKey);
+        byte[] encrypted = cipher.doFinal(data.getBytes("UTF-8"));
+        return Base64.getEncoder().encodeToString(encrypted);
+    }
+
+    // Decrypt ciphertext using a private RSA key
+    public static String decryptData(String encryptedData, PrivateKey privKey) throws Exception {
+        Cipher cipher = Cipher.getInstance("RSA");
+        cipher.init(Cipher.DECRYPT_MODE, privKey);
+        byte[] decrypted = cipher.doFinal(Base64.getDecoder().decode(encryptedData));
+        return new String(decrypted, "UTF-8");
+    }
+
+    public static void main(String[] args) {
+        try {
+            // Generate keys
+            KeyPair rsaKeys = createKeys();
+            PublicKey publicKey = rsaKeys.getPublic();
+            PrivateKey privateKey = rsaKeys.getPrivate();
+
+            // Message to be encrypted
+            String originalText = "Confidential data with RSA encryption.";
+            System.out.println("Original: " + originalText);
+
+            // Encrypting the message
+            String cipherText = encryptData(originalText, publicKey);
+            System.out.println("Encrypted: " + cipherText);
+
+            // Decrypting the message
+            String plainText = decryptData(cipherText, privateKey);
+            System.out.println("Decrypted: " + plainText);
+
+        } catch (Exception ex) {
+            System.err.println("Error occurred: " + ex.getMessage());
+        }
+    }
+}
